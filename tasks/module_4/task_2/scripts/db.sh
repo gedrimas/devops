@@ -59,12 +59,18 @@ restore() {
   fi
 }
 
+find_user(){
+  read -p "Please enter user name: " username
+  grep "${username}_," $DB || echo "User not found" 
+}
+
 
 case $1 in
   add) add_user;;
   help) echo "Help tra-la-la..."; check_db $DB;;
   backup) backup_db;;
   restore) restore;;
+  find) find_user;;
   *) check_db $DB;;
 esac
 
