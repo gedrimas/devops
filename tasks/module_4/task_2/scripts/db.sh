@@ -64,13 +64,32 @@ find_user(){
   grep "${username}_," $DB || echo "User not found" 
 }
 
+inverse_option=$2
+list_all_users(){
+  echo "\$2: $2"
+  if [[ $inverse_option = "--inverse" ]]; then
+    sed 's/_//g' $DB | nl -s '. ' | tac
+  else
+    sed 's/_//g' $DB | nl -s '. '
+  fi
+}
+
+help(){
+echo ./db.sh add - add new user
+echo ./db.sh backup - create the DB backup based on users.db file
+echo ./db.sh find - find user by name
+echo ./db.sh list - list all users, --inverse option lists users using 'in' back order
+echo ./db.sh restore - recriate users.db using last backup
+echo ./db.sh help - show how to use
+}
 
 case $1 in
   add) add_user;;
-  help) echo "Help tra-la-la..."; check_db $DB;;
+  help) help; check_db $DB;;
   backup) backup_db;;
   restore) restore;;
   find) find_user;;
+  list) list_all_users;;
   *) check_db $DB;;
 esac
 
