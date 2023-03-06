@@ -6,12 +6,12 @@ validate_user_input() {
   case $1 in
     name) while :
             do
-	      [[ $user =~ [a-zA-Z] ]] && break
+	      [[ $user =~ ^[a-zA-Z]+$ ]] && break
               read -p "Only Latin letters are allowed for user name: " user
             done;;
     role) while :
             do
-	      [[ $role =~ [a-zA-A] ]] && break
+	      [[ $role =~ ^[a-zA-Z]+$ ]] && break
               read -p "Only Latin letters are allowed for user role: " role
             done;;
   esac
@@ -66,7 +66,6 @@ find_user(){
 
 inverse_option=$2
 list_all_users(){
-  echo "\$2: $2"
   if [[ $inverse_option = "--inverse" ]]; then
     sed 's/_//g' $DB | nl -s '. ' | tac
   else
