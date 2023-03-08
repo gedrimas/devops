@@ -32,8 +32,26 @@ echo "owner === $owner"
 echo "pull === $pull_from_source_changes"
 echo "configuration === $configuration"
 
-jq 'del(.metadata)' $pipeline_config | jq '.pipeline.version = .pipeline.version + 1' > $updated_pipeline_config
-jq $updated_pipeline_config | jq --arg owner "$owner" '.pipeline.name = "ABC"' > $updated_pipeline_config
+set_configuration() {
+qualityGateEnvVar=$(jq '.pipeline.stages[1].actions[0].configuration.EnvironmentVariables' $pipeline_config)
+buildEnvVar=$(jq '.pipeline.stages[3].actions[0].configuration.EnvironmentVariables' $pipeline_config)
+
+echo $qualityGateEnvVar | sed 's/"value\\":\\.*\\",/\"value\\":\\"REPLACE\\",/' | sed "s/REPLACE/$configuration/"
+
+jq -c '.pipeline.stages[1].actions[0].configuration.EnvironmentVariables | fromjson' $pipeline_config | jq -c '.[]' |\
+ jq --arg config "$configuration" '.value = $config'
+
+#echo "TEST $test"
+}
+
+jq 'del(.metadata)' $pipeline_config | jq '.pipeline.version = .pipeline.version + 1' |\
+ jq --arg owner "$owner" '.pipeline.stages[0].actions[0].configuration.Owner = $owner' |\
+ jq --arg branch "$branch" '.pipeline.stages[0].actions[0].configuration.Branch = $branch' |\
+ jq --arg pull "$pull_from_source_changes" '.pipeline.stages[0].actions[0].configuration.PollForSourceChanges = $pull'
+
+
 #'.pipeline.stages[0].actions[0].configuration.Owner = $owner' > $updated_pipeline_config
 #jq '.pipeline.name = 123' "../${updated_pipeline_config}"
-cat $updated_pipeline_config
+#cat $updated_pipeline_config
+
+set_configuration
